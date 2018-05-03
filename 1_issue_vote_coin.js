@@ -59,13 +59,13 @@ const setJointAdminCandidateAccount = async () => {
     return server.submitTransaction(transaction)
 }
 
-const changeTrust = async (sourceKeys) => {
+const changeTrust = async (sourceKeys, limit = '1') => {
     const account = await server.loadAccount(sourceKeys.publicKey());
 
     const transaction = new StellarSdk.TransactionBuilder(account)
         .addOperation(StellarSdk.Operation.changeTrust({
             asset: voteCoin,
-            limit: '1'
+            limit: limit
         }))
         .build();
     transaction.sign(sourceKeys);
@@ -82,6 +82,9 @@ const setVoterChangeTrust = async () => {
     await changeTrust(Account.misterE)
     await changeTrust(Account.misterF)
     await changeTrust(Account.misterG)
+
+    // Change Trust for Offer Account can receive vote coin
+    await changeTrust(Account.jointOffer, '100000')
 
     return Promise.resolve()
 }
@@ -105,6 +108,26 @@ const setAllowTrustAndSentVoteCoin = async (accounts) => {
     })
         
     transaction = transaction.build();
+
+    // Sign Transaction By Admin + Candidate
+    transaction.sign(Account.adminX);
+    transaction.sign(Account.adminY);
+    transaction.sign(Account.misterA);
+    transaction.sign(Account.misterB);
+
+    return server.submitTransaction(transaction);
+}
+
+const setJointAccountAllowTrustVoteCoin = async () => {
+
+    const issueAccount = await server.loadAccount(issuingKeys.publicKey());
+    let transaction = new StellarSdk.TransactionBuilder(issueAccount)
+        .addOperation(StellarSdk.Operation.allowTrust({
+            trustor: Account.jointOffer.publicKey(),
+            assetCode: Constants.VOTE_COIN,
+            authorize: true
+        }))
+        .build();
 
     // Sign Transaction By Admin + Candidate
     transaction.sign(Account.adminX);
@@ -145,14 +168,17 @@ const disableIssueVoteCoinAccount = async () => {
 
 const run = async () => {
     try {
-        // await setJointAdminCandidateAccount()
+        await setJointAdminCandidateAccount()
         console.log("Set Joint Account Success")
 
-        // await setVoterChangeTrust()
+        await setVoterChangeTrust()
         console.log("All Voter Change Trust Success")
 
-        // await issueVoteCoin()
+        await issueVoteCoin()
         console.log("Issue Vote Coin and Sent to Voter Success")
+
+        await setJointAccountAllowTrustVoteCoin()
+        console.log("Allow Joint Account to Receive Vote Coin")
 
         await disableIssueVoteCoinAccount()
         console.log("Disable Issuer Account Success")
