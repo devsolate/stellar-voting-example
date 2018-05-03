@@ -7,8 +7,9 @@ const server = new StellarSdk.Server(Constants.STELLAR_SERVER)
 StellarSdk.Network.useTestNetwork();
 
 // Vote Coin
-const issuingKeys = Account.jointIssuerVote;
-const voteCoin = new StellarSdk.Asset(Constants.VOTE_COIN, issuingKeys.publicKey())
+const issuingKeys = Account.jointIssuerCandidate;
+const voteACoin = new StellarSdk.Asset(Constants.VOTE_A_COIN, issuingKeys.publicKey())
+const voteBCoin = new StellarSdk.Asset(Constants.VOTE_B_COIN, issuingKeys.publicKey())
 
 const setJointAdminCandidateAccount = async () => {
     // Load Joint Account
@@ -18,7 +19,7 @@ const setJointAdminCandidateAccount = async () => {
     - Set All Admin + Candidate Account for Multi-Sig with Weight 1
     - Disable Master Key
     - Set Threshold to 4 to require all account for action
-    - Set Authorization Required / Voter should be approved by Issuer Account before there can hold VoteCoin
+    - Set Authoirzation Not Required for CandidateCoin / User can change trust without allow
     */
     const transaction = new StellarSdk.TransactionBuilder(account)
         .addOperation(StellarSdk.Operation.setOptions({
@@ -49,8 +50,7 @@ const setJointAdminCandidateAccount = async () => {
             masterWeight: 0,
             lowThreshold: 4,
             medThreshold: 4,
-            highThreshold: 4,
-            setFlags: StellarSdk.AuthRevocableFlag | StellarSdk.AuthRequiredFlag
+            highThreshold: 4
         }))
         .build()
 
@@ -64,8 +64,12 @@ const changeTrust = async (sourceKeys) => {
 
     const transaction = new StellarSdk.TransactionBuilder(account)
         .addOperation(StellarSdk.Operation.changeTrust({
-            asset: voteCoin,
-            limit: '1'
+            asset: voteACoin,
+            limit: '1000'
+        }))
+        .addOperation(StellarSdk.Operation.changeTrust({
+            asset: voteBCoin,
+            limit: '1000'
         }))
         .build();
     transaction.sign(sourceKeys);
@@ -73,38 +77,29 @@ const changeTrust = async (sourceKeys) => {
     return server.submitTransaction(transaction);
 }
 
-const setVoterChangeTrust = async () => {
-    // Change Trust for All Voter account can hold vote coin
-    await changeTrust(Account.misterA)
-    await changeTrust(Account.misterB)
-    await changeTrust(Account.misterC)
-    await changeTrust(Account.misterD)
-    await changeTrust(Account.misterE)
-    await changeTrust(Account.misterF)
-    await changeTrust(Account.misterG)
+const setOfferAccountChangeTrust = async () => {
+    // Change Trust for Joint Offer Account
+    await changeTrust(Account.jointOffer)
 
     return Promise.resolve()
 }
 
-const setAllowTrustAndSentVoteCoin = async (accounts) => {
-
+const issueCandidateCoin = async () => {
     const issueAccount = await server.loadAccount(issuingKeys.publicKey());
-    let transaction = new StellarSdk.TransactionBuilder(issueAccount)
 
-    accounts.map((account) => {
-        transaction = transaction.addOperation(StellarSdk.Operation.allowTrust({
-            trustor: account.publicKey(),
-            assetCode: Constants.VOTE_COIN,
-            authorize: true
+    // Sent Coin to Offer Account
+    const transaction = new StellarSdk.TransactionBuilder(issueAccount)
+        .addOperation(StellarSdk.Operation.payment({
+            destination: Account.jointOffer.publicKey(),
+            asset: voteACoin,
+            amount: '1000'
         }))
         .addOperation(StellarSdk.Operation.payment({
-            destination: account.publicKey(),
-            asset: voteCoin,
-            amount: '1'
+            destination: Account.jointOffer.publicKey(),
+            asset: voteBCoin,
+            amount: '1000'
         }))
-    })
-        
-    transaction = transaction.build();
+        .build();
 
     // Sign Transaction By Admin + Candidate
     transaction.sign(Account.adminX);
@@ -115,12 +110,7 @@ const setAllowTrustAndSentVoteCoin = async (accounts) => {
     return server.submitTransaction(transaction);
 }
 
-const issueVoteCoin = async () => {
-    await setAllowTrustAndSentVoteCoin([Account.misterA, Account.misterB, Account.misterC, Account.misterD, Account.misterE, Account.misterF, Account.misterG])
-    return Promise.resolve()
-}
-
-const disableIssueVoteCoinAccount = async () => {
+const disableIssuerAccount = async () => {
     // Load Joint Account
     const account = await server.loadAccount(issuingKeys.publicKey())
 
@@ -143,20 +133,21 @@ const disableIssueVoteCoinAccount = async () => {
     return server.submitTransaction(transaction)
 }
 
+
 const run = async () => {
     try {
-        // await setJointAdminCandidateAccount()
+        await setJointAdminCandidateAccount()
         console.log("Set Joint Account Success")
 
-        // await setVoterChangeTrust()
-        console.log("All Voter Change Trust Success")
+        await setOfferAccountChangeTrust()
+        console.log("Offer Account Change Trust Success")
 
-        // await issueVoteCoin()
+        await issueCandidateCoin()
         console.log("Issue Vote Coin and Sent to Voter Success")
 
-        await disableIssueVoteCoinAccount()
+        await disableIssuerAccount()
         console.log("Disable Issuer Account Success")
-        // Now Every Voter has VoteCoin and No More VoteCoin Generated.
+        // No More CandidateCoin Generated.
     } catch(error) {
         console.log(JSON.stringify(error))
     }

@@ -1,3 +1,3 @@
 const Account = require('./account')
 
-console.log(Account.misterA.publicKey())
+console.log(Account.jointOffer.publicKey())
