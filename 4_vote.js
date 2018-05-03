@@ -56,8 +56,9 @@ const run = async() => {
         await vote(Account.misterF, voteACoin)
         console.log("Mister F Vote >> A: Success")
 
-        await vote(Account.misterG, voteACoin)
-        console.log("Mister G Vote >> A: Success")
+        // Mister G No Vote
+        // await vote(Account.misterG, voteACoin)
+        // console.log("Mister G Vote >> A: Success")
 
     } catch(error) {
         console.log(JSON.stringify(error))
