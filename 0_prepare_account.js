@@ -5,9 +5,8 @@ const axios = require('axios')
 const Account = require('./account')
 const Constants = require('./constants')
 
-const PrepareAccount = async (secretKey) => {
+const PrepareAccount = async (sourceKeys) => {
     // Add initial coin from friend bot
-    const sourceKeys = StellarSdk.Keypair.fromSecret(secretKey);
     const publicKey = sourceKeys.publicKey();
 
     try {
