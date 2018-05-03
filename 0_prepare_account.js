@@ -10,7 +10,7 @@ const PrepareAccount = async (sourceKeys) => {
     const publicKey = sourceKeys.publicKey();
 
     try {
-        const fundAccount = fund(publicKey)
+        const fundAccount = await fund(publicKey)
         console.log("Fund Success:", publicKey)
     } catch(error) {
         console.log("Fund Failed:", publicKey)

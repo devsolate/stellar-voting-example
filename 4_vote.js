@@ -13,21 +13,6 @@ const voteCoin = new StellarSdk.Asset(Constants.VOTE_COIN, issueVoteCoinKeys.pub
 const voteACoin = new StellarSdk.Asset(Constants.VOTE_A_COIN, issueCoinKeys.publicKey())
 const voteBCoin = new StellarSdk.Asset(Constants.VOTE_B_COIN, issueCoinKeys.publicKey())
 
-
-const changeTrust = async (sourceKeys, voteToCoin) => {
-    const account = await server.loadAccount(sourceKeys.publicKey());
-
-    const transaction = new StellarSdk.TransactionBuilder(account)
-        .addOperation(StellarSdk.Operation.changeTrust({
-            asset: voteToCoin,
-            limit: '1'
-        }))
-        .build();
-    transaction.sign(sourceKeys);
-
-    return server.submitTransaction(transaction);
-}
-
 const createVoteOffer = async (sourceKeys, voteToCoin) => {
 
     const account = await server.loadAccount(sourceKeys.publicKey())
@@ -46,7 +31,6 @@ const createVoteOffer = async (sourceKeys, voteToCoin) => {
 }
 
 const vote = async (sourceKeys, voteToCoin) => {
-    await changeTrust(sourceKeys, voteToCoin)
     await createVoteOffer(sourceKeys, voteToCoin)
 
     return Promise.resolve()
