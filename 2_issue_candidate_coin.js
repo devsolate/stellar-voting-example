@@ -150,9 +150,11 @@ const issueCandidateCoin = async () => {
 
 const createDisableCandidateCoinContract = async (accounts) => {
 
-    const jointAccounnt = await server.loadAccount(issuingKeys.publicKey());
+    const jointAccount = await server.loadAccount(issuingKeys.publicKey());
+
+    jointAccount.incrementSequenceNumber()
     // Create Pre-Authorization Transaction
-    let transaction = new StellarSdk.TransactionBuilder(jointAccounnt, {
+    let transaction = new StellarSdk.TransactionBuilder(jointAccount, {
         timebounds: {
             minTime: Constants.END_VOTE_TIME,
             maxTime: 0
