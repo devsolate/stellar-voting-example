@@ -96,9 +96,9 @@ const getOffers = async (account) => {
 const createEndVoteContract = async () => {
 
     const offers = await getOffers(jointAccountKeys)
-    const jointAccounnt = await server.loadAccount(jointAccountKeys.publicKey());
+    const jointAccount = await server.loadAccount(jointAccountKeys.publicKey());
 
-    jointAccounnt.incrementSequenceNumber()
+    jointAccount.incrementSequenceNumber()
 
 
     let offerVoteA, offerVoteB
@@ -118,7 +118,7 @@ const createEndVoteContract = async () => {
     }
 
     // Create Pre-Authorization Transaction
-    const transaction = new StellarSdk.TransactionBuilder(jointAccounnt, {
+    const transaction = new StellarSdk.TransactionBuilder(jointAccount, {
         timebounds: {
             minTime: Constants.END_VOTE_TIME,
             maxTime: 0
@@ -145,7 +145,8 @@ const createEndVoteContract = async () => {
 
 const createPreAuthorizationTransaction = async (endVoteTransaction) => {
     // Add End Vote Transaction  Hash to PreAuth Transaction
-    const transaction = new StellarSdk.TransactionBuilder(jointAccountKeys.publicKey())
+    const jointAccount = await server.loadAccount(jointAccountKeys.publicKey());
+    const transaction = new StellarSdk.TransactionBuilder(jointAccount)
         .addOperation(StellarSdk.Operation.setOptions({
             signer: {
                 preAuthTx: endVoteTransaction.hash(),
