@@ -38,8 +38,8 @@ const vote = async (sourceKeys, voteToCoin) => {
 
 const run = async() => {
     try {
-        // await vote(Account.misterA, voteACoin)
-        // console.log("Mister A Vote >> A: Success")
+        await vote(Account.misterA, voteACoin)
+        console.log("Mister A Vote >> A: Success")
 
         await vote(Account.misterB, voteBCoin)
         console.log("Mister B Vote >> B: Success")
