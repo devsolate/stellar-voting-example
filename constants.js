@@ -9,7 +9,7 @@ const constants = {
     VOTE_COIN: "VoteCoin",
     VOTE_A_COIN: "VoteACoin",
     VOTE_B_COIN: "VoteBCoin",
-    END_VOTE_TIME: moment("2018-05-03 12:00:00+07").unix()
+    END_VOTE_TIME: moment("2018-05-04 00:00:00+07").unix()
 }
 
 module.exports = constants

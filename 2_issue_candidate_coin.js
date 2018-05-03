@@ -218,7 +218,7 @@ const run = async () => {
         await setAllowTrustCandidateCoin([Account.misterA, Account.misterB, Account.misterC, Account.misterD, Account.misterE, Account.misterF, Account.misterG, Account.jointOffer])
 
         await issueCandidateCoin()
-        console.log("Issue Vote Coin and Sent to Voter Success")
+        console.log("Issue Candidate Coin and Sent Joint Offer Account")
 
         const contract = await createDisableCandidateCoinContract([Account.misterA, Account.misterB, Account.misterC, Account.misterD, Account.misterE, Account.misterF, Account.misterG])
         console.log("XDR:", decodeURIComponent(contract.toEnvelope().toXDR().toString('base64')))
