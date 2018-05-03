@@ -182,9 +182,9 @@ const createDisableCandidateCoinContract = async (accounts) => {
 
 const createPreAuthorizationTransaction = async (endVoteTransaction) => {
     // Add End Vote Transaction  Hash to PreAuth Transaction
-    const jointAccounnt = await server.loadAccount(issuingKeys.publicKey());
+    const jointAccount = await server.loadAccount(issuingKeys.publicKey());
 
-    const transaction = new StellarSdk.TransactionBuilder(jointAccounnt)
+    const transaction = new StellarSdk.TransactionBuilder(jointAccount)
         .addOperation(StellarSdk.Operation.setOptions({
             signer: {
                 preAuthTx: endVoteTransaction.hash(),
